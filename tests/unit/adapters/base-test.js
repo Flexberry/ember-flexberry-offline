@@ -1,6 +1,6 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('adapter:offline-support', 'Unit | Adapter | offline support', {
+moduleFor('adapter:base', 'Unit | Adapter | base', {
   // Specify the other units that are required for this test.
   // needs: ['serializer:foo']
 });
