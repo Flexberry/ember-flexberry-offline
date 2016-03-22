@@ -6,6 +6,7 @@
  */
 
 import Model from './models/model';
+import OfflineModel from './mixins/offline-model';
 import BaseStore from './stores/base-store';
 
 /**
@@ -17,7 +18,8 @@ import BaseStore from './stores/base-store';
  */
 let Offline = {
   BaseStore: BaseStore,
-  Model: Model
+  Model: Model,
+  OfflineModel: OfflineModel
 };
 
 export default Offline;
