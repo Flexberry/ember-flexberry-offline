@@ -40,7 +40,6 @@
     "ember-export-application-global": "^1.0.4",
     "ember-flexberry-projections": "git+https://github.com/Flexberry/ember-flexberry-projections.git#496a4af2b823cc4c19ca6ad4df18b7628fa55b94",
     "ember-load-initializers": "^0.5.0",
-    "ember-localforage-adapter": "git+https://github.com/Flexberry/ember-localforage-adapter.git#d1a6e68276cfc5aa2621a36ff36bdaf54466608c",
     "ember-resolver": "^2.0.3",
     "ember-try": "^0.1.2",
     "loader.js": "^4.0.0"
@@ -54,7 +53,8 @@
     "ember-data store"
   ],
   "dependencies": {
-    "ember-cli-babel": "^5.1.5"
+    "ember-cli-babel": "^5.1.5",
+    "ember-localforage-adapter": "git+https://github.com/Flexberry/ember-localforage-adapter.git#d1a6e68276cfc5aa2621a36ff36bdaf54466608c"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
