@@ -54,7 +54,7 @@
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.5",
-    "ember-localforage-adapter": "git+https://github.com/Flexberry/ember-localforage-adapter.git#d1a6e68276cfc5aa2621a36ff36bdaf54466608c"
+    "ember-localforage-adapter": "git+https://github.com/Flexberry/ember-localforage-adapter.git"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
