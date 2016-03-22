@@ -1,7 +1,7 @@
 {
   "name": "ember-flexberry-offline",
-  "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "1.0.0-alpha.1",
+  "description": "Addon that extends ember-data with ember-flexberry-projections to support work in offline mode.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -11,11 +11,15 @@
     "start": "ember server",
     "test": "ember try:testall"
   },
-  "repository": "",
+  "repository": "https://github.com/Flexberry/ember-flexberry-offline",
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "",
+  "author": {
+    "name": "Flexberry",
+    "email": "support@flexberry.ru",
+    "url": "http://flexberry.ru/"
+  },
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.2.0",
@@ -42,7 +46,12 @@
     "loader.js": "^4.0.0"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "flexberry",
+    "sync",
+    "offline",
+    "ember-data",
+    "ember-data store"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.5"
