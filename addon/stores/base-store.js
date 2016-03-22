@@ -25,7 +25,7 @@ export default DS.Store.extend({
 
   init() {
     this._super(...arguments);
-    var onlineStore = this.get('onlineStore');
+    let onlineStore = this.get('onlineStore');
     if (Ember.isNone(onlineStore)) {
       onlineStore = DS.Store.create();
       this.set('onlineStore', onlineStore);
@@ -44,13 +44,7 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   findAll: function (modelName, options) {
-    if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-	  // decorateAPICall('all');
-    }
-    else {
-      var onlineStore = this.get('onlineStore');
-      return onlineStore.findAll.apply(onlineStore, arguments);
-    }
+	return _decorateMethodAndCall('all', 'findAll', arguments, 1);
   },
 
   /**
@@ -64,13 +58,7 @@ export default DS.Store.extend({
     @return {Promise} promise
    */
   findRecord: function(modelName, id, options) {
-    if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      // decorateAPICall('single'),
-    }
-    else {
-      var onlineStore = this.get('onlineStore');
-      return onlineStore.findRecord.apply(onlineStore, arguments);
-    }
+	return _decorateMethodAndCall('single', 'findRecord', arguments, 2);
   },
 
   /**
@@ -84,17 +72,12 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   reloadRecord: function (internalModel) {
-    if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      // decorateAPICall('single'),
-    }
-    else {
-      var onlineStore = this.get('onlineStore');
-      return onlineStore.reloadRecord.apply(onlineStore, arguments);
-    }
+	return _decorateMethodAndCall('single', 'reloadRecord', arguments, -1);
   },
 
   adapterFor: function(type) {
-    var adapter = this._super(type);
+    let onlineStore = this.get('onlineStore');
+    let adapter = onlineStore.adapterFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       return decorateAdapter(adapter);
 	}
@@ -104,12 +87,26 @@ export default DS.Store.extend({
   },
 
   serializerFor: function(type) {
-    var serializer = this._super(type);
+    let onlineStore = this.get('onlineStore');
+    let serializer = onlineStore.serializerFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       return decorateSerializer(serializer);
 	}
     else {
       return serializer;
     }
+  },
+
+  _decorateMethodAndCall(finderType, originMethodName, originMethodArguments, optionsIndex) {
+    let onlineStore = this.get('onlineStore');
+    let originMethod = onlineStore[originMethodName];
+    let decoratedMethod = decorateAPICall(finderType, originMethod);
+	if (optionsIndex > -1) {
+      let options = originMethodArguments[optionsIndex];
+	  options = this.get('offlineGlobals').get('isOfflineEnabled') ? options : Ember.$.extend(true, { bypass: true }, options);
+      originMethodArguments[optionsIndex] = options;
+    }
+
+    return decoratedMethod.apply(onlineStore, originMethodArguments);
   }
 });
