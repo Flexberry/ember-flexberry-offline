@@ -82,7 +82,7 @@ export default Ember.Object.extend({
     let syncer = this;
 
     if(typeof descriptor === 'string') {
-      return reloadLocalRecords(descriptor, reload, projectionName);
+      return reloadLocalRecords.call(this, descriptor, reload, projectionName);
 
     } else if(isModelInstance(descriptor)) {
       return syncer._syncDownRecord(descriptor, reload, projectionName);
