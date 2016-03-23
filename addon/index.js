@@ -17,7 +17,7 @@ import BaseStore from './stores/base-store';
  * @public
  */
 let Offline = {
-  BaseStore: BaseStore,
+  Store: BaseStore,
   Model: Model,
   OfflineModel: OfflineModel
 };
