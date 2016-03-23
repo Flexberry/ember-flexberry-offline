@@ -25,14 +25,13 @@ export default DS.Store.extend({
 
   init() {
     this._super(...arguments);
-    let onlineStore = this.get('onlineStore');
-    if (Ember.isNone(onlineStore)) {
-      let owner = Ember.getOwner(this);
-      onlineStore = DS.Store.create(owner.ownerInjection());
+    let owner = Ember.getOwner(this);
+    if (Ember.isNone(this.get('onlineStore'))) {
+      let onlineStore = DS.Store.create(owner.ownerInjection());
       this.set('onlineStore', onlineStore);
     }
 
-    let syncer = Ember.getOwner(this).lookup('syncer:main');
+    let syncer = owner.lookup('syncer:main');
     this.set('syncer', syncer);
   },
 
