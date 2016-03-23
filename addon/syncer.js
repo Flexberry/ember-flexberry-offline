@@ -150,5 +150,28 @@ export default Ember.Object.extend({
 	else {
       return saveRecordToLocalStore(record);
 	}
+  },
+
+  deleteAll: function(typeName) {
+    return this.saveAll(typeName, []);
+  },
+
+  saveAll: function(typeName, records) {
+    this.set(pluralize(typeName), records);
+
+    var namespace = getNamespace(typeName);
+    return this.get('db').setItem(namespace, records);
   }
 });
+
+function pluralize(typeName) {
+  return typeName + 's';
+}
+
+function getNamespace(typeName) {
+  var LocalForageKeyHash = {
+    'job':            'EmberFryctoriaJobs',
+    'remoteIdRecord': 'EmberFryctoriaRemoteIdRecords',
+  };
+  return LocalForageKeyHash[typeName];
+}
