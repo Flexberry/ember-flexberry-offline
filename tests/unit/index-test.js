@@ -5,6 +5,6 @@ module('index tests');
 
 test('offline namesapce classes exports', function(assert) {
   assert.ok(Offline.Model);
-  assert.ok(Offline.BaseStore);
+  assert.ok(Offline.Store);
   assert.ok(Offline.OfflineModel);
 });
