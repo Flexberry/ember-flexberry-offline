@@ -51,12 +51,10 @@ export default Ember.Object.extend({
   init: function() {
     let syncer = this;
 
-    let localStore   = Ember.getOwner(this).lookup('store:local');
+    let localStore = Ember.getOwner(this).lookup('store:local');
     let localAdapter = localStore.get('adapter');
-    let store   = Ember.getOwner(this).lookup('service:store');
 
     syncer.set('db', window.localforage);
-    syncer.set('store', store);
     syncer.set('localStore', localStore);
     syncer.set('localAdapter', localAdapter);
 
@@ -139,7 +137,7 @@ export default Ember.Object.extend({
     }
 
     if (reload) {
-      let store = this.get('store');
+      let store = Ember.getOwner(this).lookup('service:store');
       let modelName = record.get('modelName');
       let options = { reload: true };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
