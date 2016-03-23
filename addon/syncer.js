@@ -49,12 +49,14 @@ export default Ember.Object.extend({
    * @private
    */
   init: function() {
-    var syncer = this;
+    let syncer = this;
 
-    var localStore   = Ember.getOwner(this).lookup('store:local');
-    var localAdapter = localStore.get('adapter');
+    let localStore   = Ember.getOwner(this).lookup('store:local');
+    let localAdapter = localStore.get('adapter');
+    let store   = Ember.getOwner(this).lookup('service:store');
 
     syncer.set('db', window.localforage);
+    syncer.set('store', store);
     syncer.set('localStore', localStore);
     syncer.set('localAdapter', localAdapter);
 
@@ -73,21 +75,23 @@ export default Ember.Object.extend({
    *
    * @method syncDown
    * @public
-   * @param {String|DS.Model|Array} typeName, record, records
+   * @param {String|DS.Model|Array} typeName, record, records.
+   * @param {Boolean} [reload] If set to true then syncer perform remote reload for data, otherwise data will get from the store.
+   * @param {String} [projectionName] Name of projection for remote reload of data. If not set then all properties of record, except navigation properties, will be read.
    * @return {Promie}
    */
-  syncDown: function(descriptor) {
-    var syncer = this;
+  syncDown: function(descriptor, reload, projectionName) {
+    let syncer = this;
 
     if(typeof descriptor === 'string') {
-      return reloadLocalRecords(descriptor);
+      return reloadLocalRecords(descriptor, reload, projectionName);
 
     } else if(isModelInstance(descriptor)) {
-      return syncer.syncDownRecord(descriptor);
+      return syncer._syncDownRecord(descriptor, reload, projectionName);
 
     } else if(Ember.isArray(descriptor)) {
-      var updatedRecords = descriptor.map(function(record) {
-        return syncer.syncDownRecord(record);
+      let updatedRecords = descriptor.map(function(record) {
+        return syncer._syncDownRecord(record, reload, projectionName);
       });
       return RSVP.all(updatedRecords);
 
@@ -113,21 +117,38 @@ export default Ember.Object.extend({
   },
 
   /**
-   * This method does not talk to remote store, it only need to get serializer
-   * from a store.
+   * Saves data to local store.
    *
-   * @method
+   * @method _syncDownRecord
+   * @param {DS.Model} record Record to save in local store.
+   * @param {Boolean} [reload] If set to true then syncer perform remote reload for data, otherwise data will get from the store.
+   * @param {String} [projectionName] Name of projection for remote reload of data. If not set then all properties of record, except navigation properties, will be read.
    * @private
    */
-  syncDownRecord: function(record) {
-    var localStore = this.get('localStore');
-    var localAdapter = this.get('localAdapter');
-    var snapshot = record._createSnapshot();
+  _syncDownRecord: function(record, reload, projectionName) {
+    function saveRecordToLocalStore(record) {
+      let localStore = this.get('localStore');
+      let localAdapter = this.get('localAdapter');
+      let snapshot = record._createSnapshot();
 
-    if(record.get('isDeleted')) {
-      return localAdapter.deleteRecord(localStore, snapshot.type, snapshot);
-    } else {
-      return localAdapter.createRecord(localStore, snapshot.type, snapshot);
+      if(record.get('isDeleted')) {
+        return localAdapter.deleteRecord(localStore, snapshot.type, snapshot);
+      } else {
+        return localAdapter.createRecord(localStore, snapshot.type, snapshot);
+      }
     }
+
+    if (reload) {
+      let store = this.get('store');
+      let modelName = record.get('modelName');
+      let options = { reload: true };
+      options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
+      return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
+        return saveRecordToLocalStore(reloadedRecord);
+	  });
+    }
+	else {
+      return saveRecordToLocalStore(record);
+	}
   }
 });

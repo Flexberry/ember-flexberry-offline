@@ -6,10 +6,9 @@ var RSVP = Ember.RSVP;
  * This method does not change store, only change localforage
  *
  * @method reloadLocalRecords
- * @param {DS.Store} store store:main
  * @param {String|DS.Model} type
  */
-export default function reloadLocalRecords(type) {
+export default function reloadLocalRecords(type, reload, projectionName) {
   var store = Ember.getOwner(this).lookup('service:store');
   var modelType = store.modelFor(type);
 
@@ -31,12 +30,19 @@ export default function reloadLocalRecords(type) {
   }
 
   function createAll() {
-    var records = store.all(type);
-    var createdRecords = records.map(function(record) {
-      return createLocalRecord(localAdapter, localStore, modelType, record);
-    });
+    var createdRecords;
 
-    return RSVP.all(createdRecords);
+    if (reload) {
+      let options = { reload: true };
+      options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
+      return store.findAll(type, options).then(function(records) {
+        return createLocalRecords(localAdapter, localStore, modelType, records);
+      });
+    }
+    else {
+      var records = store.peekAll(type);
+	  return createLocalRecords(localAdapter, localStore, modelType, records);
+    }
   }
 }
 
@@ -44,7 +50,6 @@ function createLocalRecord(localAdapter, localStore, modelType, record) {
   if(record.get('id')) {
     var snapshot = record._createSnapshot();
     return localAdapter.createRecord(localStore, modelType, snapshot);
-
   } 
   else {
     var recordName = record.constructor && record.constructor.modelName;
@@ -56,4 +61,11 @@ function createLocalRecord(localAdapter, localStore, modelType, record) {
 
     return RSVP.resolve();
   }
+}
+
+function createLocalRecords(localAdapter, localStore, modelType, records) {
+  createdRecords = records.map(function(record) {
+    return createLocalRecord(localAdapter, localStore, modelType, record);
+  });
+  return RSVP.all(createdRecords);
 }
