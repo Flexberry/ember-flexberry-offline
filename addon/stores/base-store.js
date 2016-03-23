@@ -45,7 +45,7 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   findAll: function (modelName, options) {
-	return _decorateMethodAndCall('all', 'findAll', arguments, 1);
+	return this._decorateMethodAndCall('all', 'findAll', arguments, 1);
   },
 
   /**
@@ -59,7 +59,7 @@ export default DS.Store.extend({
     @return {Promise} promise
    */
   findRecord: function(modelName, id, options) {
-	return _decorateMethodAndCall('single', 'findRecord', arguments, 2);
+	return this._decorateMethodAndCall('single', 'findRecord', arguments, 2);
   },
 
   /**
@@ -73,7 +73,7 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   reloadRecord: function (internalModel) {
-	return _decorateMethodAndCall('single', 'reloadRecord', arguments, -1);
+	return this._decorateMethodAndCall('single', 'reloadRecord', arguments, -1);
   },
 
   adapterFor: function(type) {
