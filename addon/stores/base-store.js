@@ -2,7 +2,7 @@ import Ember from 'ember';
 import DS from 'ember-data';
 import decorateAdapter from './base-store/decorate-adapter';
 import decorateSerializer from './base-store/decorate-serializer';
-// import decorateAPICall from './base-store/decorate-api-call';
+import decorateAPICall from './base-store/decorate-api-call';
 
 /**
  * This should be used as store:main
