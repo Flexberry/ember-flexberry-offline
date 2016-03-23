@@ -30,8 +30,6 @@ export default function reloadLocalRecords(type, reload, projectionName) {
   }
 
   function createAll() {
-    var createdRecords;
-
     if (reload) {
       let options = { reload: true };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
@@ -64,7 +62,7 @@ function createLocalRecord(localAdapter, localStore, modelType, record) {
 }
 
 function createLocalRecords(localAdapter, localStore, modelType, records) {
-  createdRecords = records.map(function(record) {
+  var createdRecords = records.map(function(record) {
     return createLocalRecord(localAdapter, localStore, modelType, record);
   });
   return RSVP.all(createdRecords);
