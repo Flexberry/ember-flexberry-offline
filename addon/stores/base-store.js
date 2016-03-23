@@ -27,7 +27,8 @@ export default DS.Store.extend({
     this._super(...arguments);
     let onlineStore = this.get('onlineStore');
     if (Ember.isNone(onlineStore)) {
-      onlineStore = DS.Store.create();
+      let owner = Ember.getOwner(this);
+      onlineStore = DS.Store.create(owner.ownerInjection());
       this.set('onlineStore', onlineStore);
     }
 

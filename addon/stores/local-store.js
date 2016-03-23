@@ -16,6 +16,7 @@ import generateUniqueId from '../utils/generate-unique-id';
  */
 export default DS.Store.extend({
   init: function() {
+    let owner = Ember.getOwner(this);
     var serializer = LFSerializer.extend({
       /**
        `serializeBelongsTo` can be used to customize how `DS.belongsTo` properties are serialized.
@@ -43,7 +44,7 @@ export default DS.Store.extend({
           json[payloadKey] = belongsToId;
         }
       }
-	}).create();
+	}).create(owner.ownerInjection());
 
     var adapter = LFAdapter
       .extend({
@@ -53,7 +54,7 @@ export default DS.Store.extend({
         },
         generateIdForRecord: generateUniqueId
       })
-      .create({
+      .create(owner.ownerInjection(), {
         caching: 'none',
         namespace: 'ember-flexberry-offline:store',
         serializer: serializer,
