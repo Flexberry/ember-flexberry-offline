@@ -42,6 +42,17 @@ export default Ember.Service.extend(Ember.Evented, {
   isModeSwitchOnErrorsEnabled: false,
 
   /**
+  * If true then all work with records will sync down when online.
+  * This let user to continue work without online connection.
+  * Gets from application config.
+  * @property isSyncDownWhenOnlineEnabled
+  * @type Boolean
+  * @default true
+  * @readOnly
+  **/
+  isSyncDownWhenOnlineEnabled: true,
+  
+  /**
    * Trigger for "online is available" or "online is unavailable" event.
    * Event name: online/offline.
    *
@@ -73,6 +84,7 @@ export default Ember.Service.extend(Ember.Evented, {
     let app = Ember.getOwner(this).application;
     this._setOption('isOfflineEnabled', app.offline && app.offline.offlineEnabled);
     this._setOption('isModeSwitchOnErrorsEnabled', app.offline && app.offline.modeSwitchOnErrorsEnabled);
+    this._setOption('isSyncDownWhenOnlineEnabled', app.offline && app.offline.syncDownWhenOnlineEnabled);
     let isOnlineAvailable = this.checkOnlineAvailable();
     this.setOnlineAvailable(isOnlineAvailable);
   },

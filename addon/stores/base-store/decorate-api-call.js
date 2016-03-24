@@ -10,7 +10,7 @@ export default function decorateAPICall(finderType, superFunc) {
   return function apiCall() {
     var store = this;
     var args = arguments;
-    var syncer = store.get('syncer');
+    var syncer = Ember.getOwner(store).lookup('syncer:main');
     var _superFinder = superFunc;
 
     if (args.length > 0) {
@@ -27,7 +27,15 @@ export default function decorateAPICall(finderType, superFunc) {
       .then(syncDown);
 	*/
 
-    return _superFinder.apply(store, args);
+    return _superFinder.apply(store, args)
+      .then(function(result) {
+        if (Ember.getOwner(store).lookup('service:offline-globals').get('isSyncDownWhenOnlineEnabled')) {
+          return syncDown(result);
+        }
+        else {
+          return result;
+        }
+      });
 
     function syncUp() {
       return syncer.syncUp().catch(function(error) {
