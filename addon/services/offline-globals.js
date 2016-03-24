@@ -61,7 +61,7 @@ export default Ember.Service.extend(Ember.Evented, {
   init() {
     this._super(...arguments);
     let app = Ember.getOwner(this).application;
-	let isOfflineEnabled = app.offlineEnabled;
+	let isOfflineEnabled = app.offline.offlineEnabled;
 	if (!Ember.isNone(isOfflineEnabled)) {
       this.set('isOfflineEnabled', isOfflineEnabled);
     }
