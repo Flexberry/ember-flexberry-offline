@@ -15,10 +15,10 @@ export default function decorateSerializer(serializer) {
   var localSerializer = Ember.getOwner(this).lookup('store:local').get('adapter.serializer');
 
   // serialize()
-  // extract()
+  // normalizeResponse()
   // normalize() is not used in localforage adapter, so we do not decorate
   decorateSerializerMethod(serializer, localSerializer, 'serialize', 0);
-  decorateSerializerMethod(serializer, localSerializer, 'extract',   2);
+  decorateSerializerMethod(serializer, localSerializer, 'normalizeResponse',   2);
   // decorateSerializerMethod(serializer, localSerializer, 'normalize', 2);
 
   return serializer;
