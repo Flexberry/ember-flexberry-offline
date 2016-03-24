@@ -1,11 +1,12 @@
 import Ember from 'ember';
 
-export default function backup(isOnline, backupFn, args) {
+export default function backup(isModeSwitchOnErrorsEnabled, backupFn, args) {
   return function(error) {
-    if(isOnline) {
-      return Ember.RSVP.reject(error);
-    } else {
+    if(isModeSwitchOnErrorsEnabled) {
       return backupFn.apply(null, args);
+    }
+    else {
+      return Ember.RSVP.reject(error);
     }
   };
 }

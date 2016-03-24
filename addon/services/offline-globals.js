@@ -32,6 +32,16 @@ export default Ember.Service.extend(Ember.Evented, {
   isOfflineEnabled: true,
 
   /**
+  * If true then perform switch to offline mode when got online connection errors.
+  * Gets from application config.
+  * @property isModeSwitchOnErrorsEnabled
+  * @type Boolean
+  * @default false
+  * @readOnly
+  **/
+  isModeSwitchOnErrorsEnabled: false,
+
+  /**
    * Trigger for "online is available" or "online is unavailable" event.
    * Event name: online/offline.
    *
@@ -61,12 +71,15 @@ export default Ember.Service.extend(Ember.Evented, {
   init() {
     this._super(...arguments);
     let app = Ember.getOwner(this).application;
-	let isOfflineEnabled = app.offline.offlineEnabled;
-	if (!Ember.isNone(isOfflineEnabled)) {
-      this.set('isOfflineEnabled', isOfflineEnabled);
-    }
-
+    this._setOption('isOfflineEnabled', app.offline && app.offline.offlineEnabled);
+    this._setOption('isModeSwitchOnErrorsEnabled', app.offline && app.offline.modeSwitchOnErrorsEnabled);
     let isOnlineAvailable = this.checkOnlineAvailable();
     this.setOnlineAvailable(isOnlineAvailable);
+  },
+
+  _setOption: function(optionName, optionValue) {
+    if (!Ember.isNone(optionValue)) {
+      this.set(optionName, optionValue);
+    }
   }
 });

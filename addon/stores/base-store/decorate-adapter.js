@@ -38,12 +38,12 @@ export default function decorateAdapter(adapter) {
 function decorateAdapterMethod(adapter, localAdapter, methodName) {
   var originMethod = adapter[methodName];
   var backupMethod = createBackupMethod(localAdapter, methodName);
-  var isOnline = Ember.getOwner(this).lookup('service:offline-globals').get('isOnline');
 
   adapter[methodName] = function() {
-    if (isOnline) {
+    var offlineGlobals = Ember.getOwner(this).lookup('service:offline-globals');
+    if (offlineGlobals.get('isOnline')) {
       return originMethod.apply(adapter, arguments)
-        .catch(backup(isOnline, backupMethod, arguments));
+        .catch(backup(offlineGlobals.get('isModeSwitchOnErrorsEnabled'), backupMethod, arguments));
     }
 	else {
       backupMethod.apply(null, arguments);
