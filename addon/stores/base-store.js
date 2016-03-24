@@ -75,6 +75,28 @@ export default DS.Store.extend({
 	return this._decorateMethodAndCall('single', 'reloadRecord', arguments, -1);
   },
 
+  /**
+    Query for records that meet certain criteria. Resolves with DS.RecordArray.
+    @method query
+    @param {String} modelName
+    @param {Object} query
+    @return {Promise} promise
+  */
+  query: function (modelName, query) {
+    return this._decorateMethodAndCall('multiple', 'query', arguments, -1);
+  },
+
+  /**
+    Query for record that meet certain criteria. Resolves with single record.
+    @method query
+    @param {String} modelName
+    @param {Object} query
+    @return {Promise} promise
+  */
+  queryRecord: function (modelName, query) {
+    return this._decorateMethodAndCall('single', 'queryRecord', arguments, -1);
+  },
+
   adapterFor: function(type) {
     let onlineStore = this.get('onlineStore');
     let adapter = onlineStore.adapterFor(type);
