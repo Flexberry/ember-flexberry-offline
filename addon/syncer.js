@@ -136,17 +136,18 @@ export default Ember.Object.extend({
       }
     }
 
+    var syncer = this;
     if (reload) {
       let store = Ember.getOwner(this).lookup('service:store');
       let modelName = record.get('modelName');
       let options = { reload: true };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
-        return saveRecordToLocalStore(reloadedRecord);
+        return saveRecordToLocalStore.call(syncer, reloadedRecord);
 	  });
     }
 	else {
-      return saveRecordToLocalStore(record);
+      return saveRecordToLocalStore.call(syncer, record);
 	}
   },
 
