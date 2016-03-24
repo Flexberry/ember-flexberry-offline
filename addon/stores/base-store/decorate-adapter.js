@@ -15,15 +15,15 @@ export default function decorateAdapter(adapter) {
 
   var localAdapter = Ember.getOwner(this).lookup('store:local').get('adapter');
 
-  // find()
+  // findRecord()
   // findAll()
-  // findQuery()
+  // query()
   // findMany()
   // createRecord()
   // updateRecord()
   // deleteRecord()
   var methods = [
-    'find', 'findAll', 'findQuery', 'findMany',
+    'findRecord', 'findAll', 'query', 'findMany',
     'createRecord', 'updateRecord', 'deleteRecord'
   ];
 
