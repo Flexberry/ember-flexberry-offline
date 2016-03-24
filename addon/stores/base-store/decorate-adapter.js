@@ -27,8 +27,9 @@ export default function decorateAdapter(adapter) {
     'createRecord', 'updateRecord', 'deleteRecord'
   ];
 
+  var _this = this;
   methods.forEach(function(methodName) {
-    decorateAdapterMethod(adapter, localAdapter, methodName);
+    decorateAdapterMethod.call(_this, adapter, localAdapter, methodName);
   });
 
   return adapter;

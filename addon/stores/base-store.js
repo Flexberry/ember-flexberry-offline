@@ -79,7 +79,7 @@ export default DS.Store.extend({
     let onlineStore = this.get('onlineStore');
     let adapter = onlineStore.adapterFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      return decorateAdapter(adapter);
+      return decorateAdapter.call(this, adapter);
 	}
     else {
       return adapter;
@@ -90,7 +90,7 @@ export default DS.Store.extend({
     let onlineStore = this.get('onlineStore');
     let serializer = onlineStore.serializerFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      return decorateSerializer(serializer);
+      return decorateSerializer.call(this, serializer);
 	}
     else {
       return serializer;
