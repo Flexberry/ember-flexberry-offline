@@ -21,9 +21,13 @@ export default function decorateAPICall(finderType, superFunc) {
       }
     }
 
-    return syncUp()
+    /*
+	return syncUp()
       .then(function() { return _superFinder.apply(store, args); })
       .then(syncDown);
+	*/
+
+    return _superFinder.apply(store, args);
 
     function syncUp() {
       return syncer.syncUp().catch(function(error) {
