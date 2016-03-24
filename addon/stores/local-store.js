@@ -17,6 +17,7 @@ import generateUniqueId from '../utils/generate-unique-id';
 export default DS.Store.extend({
   init: function() {
     let owner = Ember.getOwner(this);
+    let localStore = this;
     var serializer = LFSerializer.extend(DS.EmbeddedRecordsMixin, {
       /**
        `serializeBelongsTo` can be used to customize how `DS.belongsTo` properties are serialized.
@@ -44,7 +45,9 @@ export default DS.Store.extend({
           json[payloadKey] = belongsToId;
         }
       }
-	}).create(owner.ownerInjection());
+    }).create(owner.ownerInjection(), {
+      store: localStore
+    });
 
     var adapter = LFAdapter
       .extend({
