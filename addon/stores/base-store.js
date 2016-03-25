@@ -12,6 +12,7 @@ import decorateAPICall from './base-store/decorate-api-call';
  */
 export default DS.Store.extend({
   onlineStore: null,
+  offlineStore: null,
   offlineGlobals: Ember.inject.service('offline-globals'),
 
   /**
@@ -33,6 +34,9 @@ export default DS.Store.extend({
 
     let syncer = owner.lookup('syncer:main');
     this.set('syncer', syncer);
+
+    let offlineStore = owner.lookup('store:local');
+    this.set('offlineStore', offlineStore);
   },
 
   /**
@@ -44,7 +48,8 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   findAll: function (modelName, options) {
-	return this._decorateMethodAndCall('all', 'findAll', arguments, 1);
+    let offlineStore = this.get('offlineStore');
+    return this._isOnline() ? this._decorateMethodAndCall('all', 'findAll', arguments, 1) : offlineStore.findAll.apply(offlineStore, arguments);
   },
 
   /**
@@ -58,7 +63,8 @@ export default DS.Store.extend({
     @return {Promise} promise
    */
   findRecord: function(modelName, id, options) {
-	return this._decorateMethodAndCall('single', 'findRecord', arguments, 2);
+    let offlineStore = this.get('offlineStore');
+    return this._isOnline() ? this._decorateMethodAndCall('single', 'findRecord', arguments, 2) : offlineStore.findRecord.apply(offlineStore, arguments);
   },
 
   /**
@@ -72,7 +78,8 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   reloadRecord: function (internalModel) {
-	return this._decorateMethodAndCall('single', 'reloadRecord', arguments, -1);
+    let offlineStore = this.get('offlineStore');
+    return this._isOnline() ? this._decorateMethodAndCall('single', 'reloadRecord', arguments, -1) : offlineStore.reloadRecord.apply(offlineStore, arguments);
   },
 
   /**
@@ -83,7 +90,8 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   query: function (modelName, query) {
-    return this._decorateMethodAndCall('multiple', 'query', arguments, -1);
+    let offlineStore = this.get('offlineStore');
+    return this._isOnline() ? this._decorateMethodAndCall('multiple', 'query', arguments, -1) : offlineStore.query.apply(offlineStore, arguments);
   },
 
   /**
@@ -94,14 +102,16 @@ export default DS.Store.extend({
     @return {Promise} promise
   */
   queryRecord: function (modelName, query) {
-    return this._decorateMethodAndCall('single', 'queryRecord', arguments, -1);
+    let offlineStore = this.get('offlineStore');
+    return this._isOnline() ? this._decorateMethodAndCall('single', 'queryRecord', arguments, -1) : offlineStore.queryRecord.apply(offlineStore, arguments);
   },
 
   adapterFor: function(type) {
     let onlineStore = this.get('onlineStore');
+    let offlineStore = this.get('offlineStore');
     let adapter = onlineStore.adapterFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      return decorateAdapter.call(this, adapter);
+      return this._isOnline() ? decorateAdapter.call(this, adapter) : offlineStore.adapterFor(type);
 	}
     else {
       return adapter;
@@ -110,16 +120,17 @@ export default DS.Store.extend({
 
   serializerFor: function(type) {
     let onlineStore = this.get('onlineStore');
+    let offlineStore = this.get('offlineStore');
     let serializer = onlineStore.serializerFor(type);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
-      return decorateSerializer.call(this, serializer);
+      return this._isOnline() ? decorateSerializer.call(this, serializer) : offlineStore.serializerFor(type);
 	}
     else {
       return serializer;
     }
   },
 
-  _decorateMethodAndCall(finderType, originMethodName, originMethodArguments, optionsIndex) {
+  _decorateMethodAndCall: function(finderType, originMethodName, originMethodArguments, optionsIndex) {
     let onlineStore = this.get('onlineStore');
     let originMethod = onlineStore[originMethodName];
     let decoratedMethod = decorateAPICall(finderType, originMethod);
@@ -130,5 +141,9 @@ export default DS.Store.extend({
     }
 
     return decoratedMethod.apply(onlineStore, originMethodArguments);
+  },
+
+  _isOnline: function() {
+    return this.get('offlineGlobals.isOnline');
   }
 });

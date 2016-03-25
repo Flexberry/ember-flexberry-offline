@@ -41,13 +41,8 @@ function decorateAdapterMethod(adapter, localAdapter, methodName) {
 
   adapter[methodName] = function() {
     var offlineGlobals = Ember.getOwner(this).lookup('service:offline-globals');
-    if (offlineGlobals.get('isOnline')) {
-      return originMethod.apply(adapter, arguments)
-        .catch(backup(offlineGlobals.get('isModeSwitchOnErrorsEnabled'), backupMethod, arguments));
-    }
-	else {
-      backupMethod.apply(null, arguments);
-    }
+    return originMethod.apply(adapter, arguments)
+      .catch(backup(offlineGlobals.get('isModeSwitchOnErrorsEnabled'), backupMethod, arguments));
   };
 
   adapter.flexberry[methodName] = originMethod;
