@@ -55,7 +55,27 @@ export default DS.Store.extend({
           this._super(...arguments);
           window.localforage.setDriver(window.localforage.INDEXEDDB);
         },
-        generateIdForRecord: generateUniqueId
+        generateIdForRecord: generateUniqueId,
+        getPaginationQuery: function(page, perPage) {
+          let query = {};
+          return query;
+        },
+
+        getSortingQuery: function(sortingInfo, serializer) {
+          let query = {};
+
+          return query;
+        },
+
+        getLimitFunctionQuery: function(limitFunction, projectionName) {
+          let query = {};
+
+          if (projectionName && typeof (projectionName) === 'string' && projectionName.length > 0) {
+            Ember.merge(query, { projection: projectionName });
+          }
+
+          return query;
+        },
       })
       .create(owner.ownerInjection(), {
         caching: 'none',
