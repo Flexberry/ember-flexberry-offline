@@ -102,7 +102,9 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
     var attrs = projection.attributes;
     var relationshipNames = Ember.get(modelType, 'relationshipNames');
 
-    for (let belongToName in relationshipNames.belongsTo) {
+    for (let i = 0; i < relationshipNames.belongsTo.length; i++) {
+      var belongToName = relationshipNames.belongsTo[i];
+
       // Save related record into local store only if relationship included into projection.
       if (attrs.hasOwnProperty(belongToName)) {
         var async = isAsync(modelType, belongToName);
@@ -120,7 +122,9 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
       }
     }
 
-    for (let hasManyName in relationshipNames.hasMany) {
+    for (let i = 0; i < relationshipNames.hasMany.length; i++) {
+      var hasManyName = relationshipNames.hasMany[i];
+
       // Save related records into local store only if relationship included into projection.
       if (attrs.hasOwnProperty(hasManyName)) {
         var async = isAsync(modelType, belongToName);
