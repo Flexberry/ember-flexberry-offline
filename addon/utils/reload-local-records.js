@@ -110,13 +110,17 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
         var async = isAsync(modelType, belongToName);
         if (async) {
           mainRecord.get(belongToName).then(function(relatedRecord) {
-            promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+            if (!Ember.isNone(relatedRecord)) {
+              promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+            }
           });
         }
         else {
           if (isEmbedded(store, modelType, belongToName)) {
             var relatedRecord = mainRecord.get(belongToName);
-            promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+            if (!Ember.isNone(relatedRecord)) {
+              promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+            }
           }
         }
       }
