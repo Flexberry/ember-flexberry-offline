@@ -124,7 +124,9 @@ export default Ember.Object.extend({
    * @private
    */
   _syncDownRecord: function(record, reload, projectionName) {
-    function saveRecordToLocalStore(record) {
+    function saveRecordToLocalStore(store, record, projectionName) {
+      let modelType = store.modelFor(record.constructor.modelName);
+      let projection = modelType.projections[projectionName];
       let localStore = this.get('localStore');
       let localAdapter = this.get('localAdapter');
       let snapshot = record._createSnapshot();
@@ -132,22 +134,24 @@ export default Ember.Object.extend({
       if(record.get('isDeleted')) {
         return localAdapter.deleteRecord(localStore, snapshot.type, snapshot);
       } else {
-        return localAdapter.createRecord(localStore, snapshot.type, snapshot);
+        return localAdapter.createRecord(localStore, snapshot.type, snapshot).then(function() {
+          return syncDownRelatedRecords(store, record, localAdapter, localStore, projection);
+        });
       }
     }
 
     var syncer = this;
+    var store = Ember.getOwner(this).lookup('service:store');
     if (reload) {
-      let store = Ember.getOwner(this).lookup('service:store');
       let modelName = record.get('modelName');
       let options = { reload: true };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
-        return saveRecordToLocalStore.call(syncer, reloadedRecord);
+        return saveRecordToLocalStore.call(syncer, store, reloadedRecord, projectionName);
 	  });
     }
 	else {
-      return saveRecordToLocalStore.call(syncer, record);
+      return saveRecordToLocalStore.call(syncer, store, record, projectionName);
 	}
   },
 
