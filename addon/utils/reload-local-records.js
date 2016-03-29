@@ -83,14 +83,16 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
     return Ember.get(modelType, 'relationshipsByName').get(relationshipName).options.async;
   }
 
-  function createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, projection) {
+  function createRelatedBelongsToRecord(store, relatedRecord, localAdapter, localStore, projection) {
+    let modelType = store.modelFor(relatedRecord.constructor.modelName);
     return createLocalRecord(store, localAdapter, localStore, modelType, relatedRecord, projection);
   }
 
-  function createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, projection) {
+  function createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, projection) {
     let promises = Ember.A();
     for (let i = 0; i < relatedRecords.get('length'); i++) {
       let relatedRecord = relatedRecords.objectAt(i);
+      let modelType = store.modelFor(relatedRecord.constructor.modelName);
       promises.pushObject(createLocalRecord(store, localAdapter, localStore, modelType, relatedRecord, projection));
     }
     return promises;
@@ -111,7 +113,7 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
         if (async) {
           mainRecord.get(belongToName).then(function(relatedRecord) {
             if (!Ember.isNone(relatedRecord)) {
-              promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+              promises.pushObject(createRelatedBelongsToRecord(store, relatedRecord, localAdapter, localStore, attrs[belongToName]));
             }
           });
         }
@@ -119,7 +121,7 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
           if (isEmbedded(store, modelType, belongToName)) {
             var relatedRecord = mainRecord.get(belongToName);
             if (!Ember.isNone(relatedRecord)) {
-              promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+              promises.pushObject(createRelatedBelongsToRecord(store, relatedRecord, localAdapter, localStore, attrs[belongToName]));
             }
           }
         }
@@ -134,13 +136,13 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
         var async = isAsync(modelType, belongToName);
         if (async) {
           mainRecord.get(hasManyName).then(function(relatedRecords) {
-            return promises.pushObjects(createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
+            return promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
           });
         }
         else {
           if (isEmbedded(store, modelType, hasManyName)) {
             var relatedRecords = mainRecord.get(hasManyName);
-            promises.pushObjects(createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
+            promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
           }
         }
       }
