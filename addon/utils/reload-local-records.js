@@ -109,7 +109,7 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
       if (attrs.hasOwnProperty(belongToName)) {
         var async = isAsync(modelType, belongToName);
         if (async) {
-          return mainRecord.get(belongToName).then(function(relatedRecord) {
+          mainRecord.get(belongToName).then(function(relatedRecord) {
             promises.pushObject(createRelatedBelongsToRecord(store, modelType, relatedRecord, localAdapter, localStore, attrs[belongToName]));
           });
         }
@@ -129,14 +129,14 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
       if (attrs.hasOwnProperty(hasManyName)) {
         var async = isAsync(modelType, belongToName);
         if (async) {
-          return mainRecord.get(hasManyName).then(function(relatedRecords) {
+          mainRecord.get(hasManyName).then(function(relatedRecords) {
             return promises.pushObjects(createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
           });
         }
         else {
           if (isEmbedded(store, modelType, hasManyName)) {
             var relatedRecords = mainRecord.get(hasManyName);
-            return promises.pushObjects(createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
+            promises.pushObjects(createRelatedHasManyRecords(store, modelType, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
           }
         }
       }
