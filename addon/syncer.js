@@ -1,7 +1,7 @@
 import Ember from 'ember';
-import generateUniqueId           from './utils/generate-unique-id';
-import reloadLocalRecords         from './utils/reload-local-records';
-import isModelInstance            from './utils/is-model-instance';
+import generateUniqueId from './utils/generate-unique-id';
+import {reloadLocalRecords, syncDownRelatedRecords} from './utils/reload-local-records';
+import isModelInstance from './utils/is-model-instance';
 
 var RSVP = Ember.RSVP;
 
