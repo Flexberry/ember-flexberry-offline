@@ -278,11 +278,11 @@ export default DS.Store.extend({
           case 'attr':
             break;
           case 'belongsTo':
-              let id = record[attrName];
-              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-                delete record[attrName];
-                record[attrName] = relatedRecord;
-              }));
+            let id = record[attrName];
+            promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
+              delete record[attrName];
+              record[attrName] = relatedRecord;
+            }));
             break;
           case 'hasMany':
             let ids = Ember.copy(record[attrName], true);
@@ -290,6 +290,7 @@ export default DS.Store.extend({
             delete record[attrName];
             record[attrName] = hasManyRecords;
             for (let i = 0; i < ids.length; i++) {
+              let id = ids[i];
               promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
                 hasManyRecords.addObject(relatedRecord);
               }));
