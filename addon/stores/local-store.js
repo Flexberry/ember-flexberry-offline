@@ -265,7 +265,7 @@ export default DS.Store.extend({
         return this.findRecord(proj.modelName, id, options);
       }
       else {
-        return _completeLoadRecord(relatedRecord, proj);
+        return this._completeLoadRecord(relatedRecord, proj);
       }
     }
 
