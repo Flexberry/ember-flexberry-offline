@@ -1,5 +1,6 @@
-import DS           from 'ember-data';
-import LFAdapter    from 'ember-localforage-adapter/adapters/localforage';
+import Ember from 'ember';
+import DS from 'ember-data';
+import LFAdapter from 'ember-localforage-adapter/adapters/localforage';
 import LFSerializer from 'ember-localforage-adapter/serializers/localforage';
 import generateUniqueId from '../utils/generate-unique-id';
 
@@ -175,8 +176,19 @@ export default DS.Store.extend({
    */
   query: function(modelName, query) {
     var proj = this._extractProjectionFromQuery(modelName, query);
+    var _this = this;
     return this._super(modelName, query).then(function(recordArray) {
-      return recordArray;
+      let promises = Ember.A();
+      for (let i = 0; i < recordArray.get('length'); i++) {
+        let record = recordArray.objectAt(i);
+        promises.pushObject(_this._completeLoadRecord(record, proj));
+      }
+
+      return Ember.RSVP.all(promises).then(() => {
+        return recordArray;
+      });
+    }).then(function(completeRecordArray) {
+      return completeRecordArray;
     });
   },
 
@@ -197,8 +209,11 @@ export default DS.Store.extend({
    */
   queryRecord: function(modelName, query) {
     var proj = this._extractProjectionFromQuery(modelName, query);
+    var _this = this;
     return this._super(modelName, query).then(function(record) {
-      return record;
+      return _this._completeLoadRecord(record, proj);
+    }).then(function(completeRecord) {
+      return completeRecord;
     });
   },
 
@@ -239,21 +254,54 @@ export default DS.Store.extend({
    * @return {Object} Completely loaded record with all properties
    *                  include relationships corresponds to given projection
    */
-  _completeLoadingRecord: function(record, projection) {
+  _completeLoadRecord: function(record, projection) {
+    function loadRelatedRecord(mainRecord, id, proj) {
+      let relatedRecord = this.peekRecord(proj.modelName, id);
+      if (Ember.isNone(relatedRecord)) {
+        let options = { projection: proj };
+        return this.findRecord(proj.modelName, id, options);
+      }
+      else {
+        return _completeLoadRecord(relatedRecord, proj);
+      }
+    }
+
+    let promises = Ember.A();
     let attributes = projection.attributes;
-    for (let attrName in attributes) {
+    for (var attrName in attributes) {
       if (attributes.hasOwnProperty(attrName)) {
         let attr = attributes[attrName];
         switch (attr.kind) {
+          case 'attr':
+            break;
           case 'belongsTo':
+              let id = record[attrName];
+              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
+                delete record[attrName];
+                record[attrName] = relatedRecord;
+              }));
             break;
           case 'hasMany':
+            let ids = Ember.copy(record[attrName], true);
+            let hasManyRecords = DS.ManyArray().create();
+            delete record[attrName];
+            record[attrName] = hasManyRecords;
+            for (let i = 0; i < ids.length; i++) {
+              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
+                hasManyRecords.addObject(relatedRecord);
+              }));
+            }
+
             break;
           default:
             throw new Error(`Unknown kind of projection attribute: ${attr.kind}`);
         }
       }
     }
+
+    return Ember.RSVP.all(promises).then(() => {
+      return record;
+    });
   }
 });
 
