@@ -232,9 +232,12 @@ export default DS.Store.extend({
    */
   _extractProjectionFromQuery: function(modelName, query) {
     if (query && query.projection) {
-      let projName = query.projection;
-      let typeClass = this.modelFor(modelName);
-      let proj = typeClass.projections.get(projName);
+      let proj = query.projection;
+      if (typeof query.projection === 'string') {
+        let projName = query.projection;
+        let typeClass = this.modelFor(modelName);
+        proj = typeClass.projections.get(projName);
+      }
 
       delete query.projection;
       return proj;
