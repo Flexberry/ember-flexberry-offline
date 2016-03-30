@@ -271,6 +271,7 @@ export default DS.Store.extend({
 
     let promises = Ember.A();
     let attributes = projection.attributes;
+    let snapshot = record._createSnapshot();
     for (var attrName in attributes) {
       if (attributes.hasOwnProperty(attrName)) {
         let attr = attributes[attrName];
@@ -278,14 +279,14 @@ export default DS.Store.extend({
           case 'attr':
             break;
           case 'belongsTo':
-            let id = record[attrName];
+            let id = snapshot.belongsTo(attrName, { id: true });
             promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
               delete record[attrName];
               record[attrName] = relatedRecord;
             }));
             break;
           case 'hasMany':
-            let ids = Ember.copy(record[attrName], true);
+            let ids = Ember.copy(snapshot.hasMany(attrName, { ids: true }));
             let hasManyRecords = DS.ManyArray().create();
             delete record[attrName];
             record[attrName] = hasManyRecords;
