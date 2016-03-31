@@ -133,7 +133,7 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
 
       // Save related records into local store only if relationship included into projection.
       if (attrs.hasOwnProperty(hasManyName)) {
-        var async = isAsync(modelType, belongToName);
+        var async = isAsync(modelType, hasManyName);
         if (async) {
           mainRecord.get(hasManyName).then(function(relatedRecords) {
             return promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
