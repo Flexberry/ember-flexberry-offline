@@ -272,6 +272,7 @@ export default DS.Store.extend({
     let promises = Ember.A();
     let attributes = projection.attributes;
     let snapshot = record._createSnapshot();
+    let localStore = this;
     for (var attrName in attributes) {
       if (attributes.hasOwnProperty(attrName)) {
         let attr = attributes[attrName];
@@ -287,13 +288,23 @@ export default DS.Store.extend({
             break;
           case 'hasMany':
             let ids = Ember.copy(snapshot.hasMany(attrName, { ids: true }));
-            let hasManyRecords = DS.ManyArray().create();
+            let initizlizedRelationships = record._internalModel._relationships.initializedRelationships;
+            let manyRelationship = initizlizedRelationships ? initizlizedRelationships[attrName] : null;
+            let relationshipMeta = Ember.get(record.constructor, 'relationshipsByName').get(attrName);
+            let hasManyArray = DS.ManyArray.create({
+              canonicalState: [],
+              store: localStore,
+              relationship: manyRelationship,
+              type: relationshipMeta.type,
+              record: record._internalModel,
+			});
+            hasManyArray.isPolymorphic = relationshipMeta.options.polymorphic;
             delete record[attrName];
-            record[attrName] = hasManyRecords;
+            record[attrName] = hasManyArray;
             for (let i = 0; i < ids.length; i++) {
               let id = ids[i];
               promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-                hasManyRecords.addObject(relatedRecord);
+                hasManyArray.pushObject(relatedRecord);
               }));
             }
 
