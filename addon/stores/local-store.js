@@ -281,10 +281,13 @@ export default DS.Store.extend({
             break;
           case 'belongsTo':
             let id = snapshot.belongsTo(attrName, { id: true });
-            promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-              delete record[attrName];
-              record[attrName] = relatedRecord;
-            }));
+            if (!Ember.isNone(id)) {
+              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
+                delete record[attrName];
+                record[attrName] = relatedRecord;
+              }));
+            }
+
             break;
           case 'hasMany':
             let ids = Ember.copy(snapshot.hasMany(attrName, { ids: true }));
