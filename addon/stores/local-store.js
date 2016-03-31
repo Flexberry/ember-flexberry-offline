@@ -304,10 +304,10 @@ export default DS.Store.extend({
             hasManyArray.isPolymorphic = relationshipMeta.options.polymorphic;
             delete record[attrName];
             record[attrName] = hasManyArray;
-            for (let i = 0; i < ids.length; i++) {
+            for (var i = 0; i < ids.length; i++) {
               let id = ids[i];
               promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-                hasManyArray.pushObject(relatedRecord);
+                record[attrName].pushObject(relatedRecord);
               }));
             }
 
