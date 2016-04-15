@@ -8,6 +8,7 @@
 import Model from './models/model';
 import OfflineModel from './mixins/offline-model';
 import BaseStore from './stores/base-store';
+import LocalSerializer from './serializers/local-serializer';
 
 /**
  * This namespace contains classes and methods to support work in offline mode.
@@ -19,7 +20,8 @@ import BaseStore from './stores/base-store';
 let Offline = {
   Store: BaseStore,
   Model: Model,
-  OfflineModel: OfflineModel
+  OfflineModel: OfflineModel,
+  Serializer: LocalSerializer
 };
 
 export default Offline;
