@@ -1,8 +1,8 @@
 import Ember from 'ember';
 import DS from 'ember-data';
-import LFAdapter from 'ember-localforage-adapter/adapters/localforage';
+import LocalAdapter from '../adapters/local-adapter';
 import LFSerializer from 'ember-localforage-adapter/serializers/localforage';
-import generateUniqueId from '../utils/generate-unique-id';
+import isObject from '../utils/is-object';
 
 /**
  * @module ember-flexberry-offline
@@ -45,45 +45,24 @@ export default DS.Store.extend({
         } else {
           json[payloadKey] = belongsToId;
         }
+      },
+
+      extractRelationship (relationshipModelName, relationshipHash) {
+        if (isObject(relationshipHash) && Ember.isNone(relationshipHash.type)) {
+          relationshipHash.type = relationshipModelName;
+        }
+
+        return relationshipHash;
       }
     }).create(owner.ownerInjection(), {
       store: localStore
     });
 
-    var adapter = LFAdapter
-      .extend({
-        init() {
-          this._super(...arguments);
-          window.localforage.setDriver(window.localforage.INDEXEDDB);
-        },
-        generateIdForRecord: generateUniqueId,
-        getPaginationQuery: function(page, perPage) {
-          let query = {};
-          return query;
-        },
-
-        getSortingQuery: function(sortingInfo, serializer) {
-          let query = {};
-
-          return query;
-        },
-
-        getLimitFunctionQuery: function(limitFunction, projectionName) {
-          let query = {};
-
-          if (projectionName && typeof (projectionName) === 'string' && projectionName.length > 0) {
-            Ember.merge(query, { projection: projectionName });
-          }
-
-          return query;
-        },
-      })
-      .create(owner.ownerInjection(), {
-        caching: 'none',
-        namespace: 'ember-flexberry-offline:store',
-        serializer: serializer,
-        clear: clearLFAdapter
-      });
+    let adapter = LocalAdapter.create(owner.ownerInjection(), {
+      caching: 'none',
+      namespace: 'ember-flexberry-offline:store',
+      serializer: serializer
+    });
 
     this.set('adapter', adapter);
 
@@ -175,21 +154,7 @@ export default DS.Store.extend({
    *                   once the server returns.
    */
   query: function(modelName, query) {
-    var proj = this._extractProjectionFromQuery(modelName, query);
-    var _this = this;
-    return this._super(modelName, query).then(function(recordArray) {
-      let promises = Ember.A();
-      for (let i = 0; i < recordArray.get('length'); i++) {
-        let record = recordArray.objectAt(i);
-        promises.pushObject(_this._completeLoadRecord(record, proj));
-      }
-
-      return Ember.RSVP.all(promises).then(() => {
-        return recordArray;
-      });
-    }).then(function(completeRecordArray) {
-      return completeRecordArray;
-    });
+    return this._super(modelName, query);
   },
 
   /**
@@ -208,129 +173,6 @@ export default DS.Store.extend({
    *                   once the server returns.
    */
   queryRecord: function(modelName, query) {
-    var proj = this._extractProjectionFromQuery(modelName, query);
-    var _this = this;
-    return this._super(modelName, query).then(function(record) {
-      return _this._completeLoadRecord(record, proj);
-    }).then(function(completeRecord) {
-      return completeRecord;
-    });
-  },
-
-  /**
-   * Retrieves projection from query and returns it.
-   * Retrieved projection removes from the query.
-   *
-   * @method _extractProjectionFromQuery
-   * @private
-   *
-   * @param {String} modelName The name of the model type.
-   * @param {Object} [query] Query parameters.
-   * @param {String} query.projection Projection name.
-   * @return {Object} Extracted projection from query or null
-   *                  if projection is not set in query.
-   */
-  _extractProjectionFromQuery: function(modelName, query) {
-    if (query && query.projection) {
-      let proj = query.projection;
-      if (typeof query.projection === 'string') {
-        let projName = query.projection;
-        let typeClass = this.modelFor(modelName);
-        proj = typeClass.projections.get(projName);
-      }
-
-      delete query.projection;
-      return proj;
-    }
-
-    return null;
-  },
-
-  /**
-   * Completes loading record for given projection.
-   *
-   * @method _completeLoadingRecord
-   * @private
-   *
-   * @param {Object} record Main record loaded from local store.
-   * @param {Object} projection Projection for complete loading of record.
-   * @return {Object} Completely loaded record with all properties
-   *                  include relationships corresponds to given projection
-   */
-  _completeLoadRecord: function(record, projection) {
-    function loadRelatedRecord(mainRecord, id, proj) {
-      let relatedRecord = this.peekRecord(proj.modelName, id);
-      if (Ember.isNone(relatedRecord)) {
-        let options = { projection: proj };
-        return this.findRecord(proj.modelName, id, options);
-      }
-      else {
-        return this._completeLoadRecord(relatedRecord, proj);
-      }
-    }
-
-    let promises = Ember.A();
-    let attributes = projection.attributes;
-    let snapshot = record._createSnapshot();
-    let localStore = this;
-    for (var attrName in attributes) {
-      if (attributes.hasOwnProperty(attrName)) {
-        let attr = attributes[attrName];
-        switch (attr.kind) {
-          case 'attr':
-            break;
-          case 'belongsTo':
-            let id = snapshot.belongsTo(attrName, { id: true });
-            if (!Ember.isNone(id)) {
-              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-                delete record[attrName];
-                record[attrName] = relatedRecord;
-              }));
-            }
-
-            break;
-          case 'hasMany':
-            let ids = Ember.copy(snapshot.hasMany(attrName, { ids: true }));
-            let initizlizedRelationships = record._internalModel._relationships.initializedRelationships;
-            let manyRelationship = initizlizedRelationships ? initizlizedRelationships[attrName] : null;
-            let relationshipMeta = Ember.get(record.constructor, 'relationshipsByName').get(attrName);
-            let hasManyArray = DS.ManyArray.create({
-              canonicalState: [],
-              store: localStore,
-              relationship: manyRelationship,
-              type: relationshipMeta.type,
-              record: record._internalModel,
-			});
-            hasManyArray.isPolymorphic = relationshipMeta.options.polymorphic;
-            delete record[attrName];
-            record[attrName] = hasManyArray;
-            for (var i = 0; i < ids.length; i++) {
-              let id = ids[i];
-              promises.pushObject(loadRelatedRecord.call(this, record, id, attr).then((relatedRecord) => {
-                record[attrName].pushObject(relatedRecord);
-              }));
-            }
-
-            break;
-          default:
-            throw new Error(`Unknown kind of projection attribute: ${attr.kind}`);
-        }
-      }
-    }
-
-    return Ember.RSVP.all(promises).then(() => {
-      return record;
-    });
+    return this._super(modelName, query);
   }
 });
-
-function clearLFAdapter() {
-  // clear cache
-  var cache = this.get('cache');
-  if(cache) {
-    cache.clear();
-  }
-
-  // clear data in localforage
-  return window.localforage.setItem(this._adapterNamespace(), []);
-}
