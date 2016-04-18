@@ -140,8 +140,7 @@ LocalAdapter.reopen({
         return this.queryRecord(store, type, options);
       }
       else {
-        let snapshot = relatedRecord._createSnapshot();
-        let relatedRecordObject = snapshot.seriazile();
+        let relatedRecordObject = relatedRecord.serialize({includeId: true});
         return this._completeLoadRecord(store, type, relatedRecordObject, proj);
       }
     }
