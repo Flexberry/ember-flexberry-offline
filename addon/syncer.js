@@ -143,7 +143,7 @@ export default Ember.Object.extend({
     var syncer = this;
     var store = Ember.getOwner(this).lookup('service:store');
     if (reload) {
-      let modelName = record.get('modelName');
+      let modelName = record.constructor.modelName;
       let options = { reload: true };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
