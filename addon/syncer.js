@@ -73,7 +73,7 @@ export default Ember.Object.extend({
    *
    * @method syncDown
    * @public
-   * @param {String|DS.Model|Array} typeName, record, records.
+   * @param {String|DS.Model|Array} descriptor typeName, record, records.
    * @param {Boolean} [reload] If set to true then syncer perform remote reload for data, otherwise data will get from the store.
    * @param {String} [projectionName] Name of projection for remote reload of data. If not set then all properties of record, except navigation properties, will be read.
    * @return {Promie}
@@ -144,7 +144,10 @@ export default Ember.Object.extend({
     var store = Ember.getOwner(this).lookup('service:store');
     if (reload) {
       let modelName = record.constructor.modelName;
-      let options = { reload: true };
+      let options = {
+        reload: true,
+        useOnlineStore: true
+      };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
         return saveRecordToLocalStore.call(syncer, store, reloadedRecord, projectionName);

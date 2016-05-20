@@ -7,6 +7,9 @@ var RSVP = Ember.RSVP;
  *
  * @method reloadLocalRecords
  * @param {String|DS.Model} type
+ * @param {Boolean} reload
+ * @param {String} projectionName
+ * @return {Promise} Promise
  */
 export function reloadLocalRecords(type, reload, projectionName) {
   var store = Ember.getOwner(this).lookup('service:store');
@@ -32,7 +35,10 @@ export function reloadLocalRecords(type, reload, projectionName) {
   function createAll() {
     var projection = modelType.projections[projectionName];
     if (reload) {
-      let options = { reload: true };
+      let options = {
+        reload: true,
+        useOnlineStore: true
+      };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findAll(type, options).then(function(records) {
         return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
@@ -40,7 +46,7 @@ export function reloadLocalRecords(type, reload, projectionName) {
     }
     else {
       var records = store.peekAll(type);
-	  return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
+	    return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
     }
   }
 }
@@ -51,7 +57,7 @@ function createLocalRecord(store, localAdapter, localStore, modelType, record, p
     return localAdapter.createRecord(localStore, modelType, snapshot).then(function() {
       return syncDownRelatedRecords(store, record, localAdapter, localStore, projection);
     });
-  } 
+  }
   else {
     var recordName = record.constructor && record.constructor.modelName;
     var warnMessage = 'Record ' + recordName + ' does not have an id, therefor we can not create it locally: ';
@@ -74,8 +80,8 @@ function createLocalRecords(store, localAdapter, localStore, modelType, records,
 export function syncDownRelatedRecords(store, mainRecord, localAdapter, localStore, projection) {
   function isEmbedded(store, modelType, relationshipName) {
     var serializerAttrs = store.serializerFor(modelType.modelName).get('attrs');
-    return serializerAttrs[relationshipName] && 
-    ((serializerAttrs[relationshipName].deserialize && serializerAttrs[relationshipName].deserialize === 'records') || 
+    return serializerAttrs[relationshipName] &&
+    ((serializerAttrs[relationshipName].deserialize && serializerAttrs[relationshipName].deserialize === 'records') ||
     (serializerAttrs[relationshipName].embedded && serializerAttrs[relationshipName].embedded === 'always'));
   }
 
