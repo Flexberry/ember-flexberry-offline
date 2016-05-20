@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import Proj from 'ember-flexberry-projections';
+import Proj from 'ember-flexberry-data';
 
 export default Ember.Mixin.create({
   init() {
@@ -18,10 +18,10 @@ export default Ember.Mixin.create({
         attrs['readOnly'] = Proj.attr('Read Only', { hidden: true });
         proj.attributes = attrs;
 
-        /* Add meta properties to all relationships in projection so they can 
+        /* Add meta properties to all relationships in projection so they can
 		   be serialized and deserialized in embedded records.*/
         for (let key in attrs) {
-          if (attrs.hasOwnProperty(key) && !Ember.isNone(key.kind) && 
+          if (attrs.hasOwnProperty(key) && !Ember.isNone(key.kind) &&
 		  (key.kind === 'belongsTo' || key.kind === 'hasMany')) {
             addSycPropertiesToProjection(key, key.attributes)
           }
@@ -31,7 +31,7 @@ export default Ember.Mixin.create({
       addSycPropertiesToProjection(proj, attrs);
       this.projections.set(projectionName, proj);
 	};
-	
+
     this.constructor.defineProjection = defineProjection;
 
     let syncer = Ember.getOwner(this).lookup('syncer:main');
@@ -69,7 +69,7 @@ export default Ember.Mixin.create({
    * @property editor
    * @type String
    */
-  editor: DS.attr('string'),  
+  editor: DS.attr('string'),
   /**
    * Date and time of last sync down of model.
    *
@@ -95,7 +95,7 @@ export default Ember.Mixin.create({
    * @readOnly
    */
   syncer: null,
-  
+
   /**
    * Extends saving method of model to set metadata properties.
    *

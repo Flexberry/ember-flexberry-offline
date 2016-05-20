@@ -1,4 +1,4 @@
-import Proj from 'ember-flexberry-projections';
+import Proj from 'ember-flexberry-data';
 import OfflineModel from '../mixins/offline-model';
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Addon that extends ember-data with ember-flexberry-projections to support work in offline mode.
+ * Addon that extends ember-data to support work in offline mode.
  *
  * @module ember-flexberry-offline
  * @main ember-flexberry-offline
