@@ -5,36 +5,62 @@ import decorateSerializer from './base-store/decorate-serializer';
 import decorateAPICall from './base-store/decorate-api-call';
 
 /**
- * This should be used as store:main
- *
- * @class BaseStore
- * @extends DS.Store
- */
+  Base class for application store.
+  service:store should point to instance of that class.
+
+  @class BaseStore
+  @namespace Offline
+  @extends <a href="http://emberjs.com/api/data/classes/DS.Store.html">DS.Store</a>
+*/
 export default DS.Store.extend({
+  /**
+    Store that use for making requests in online mode.
+    It can be specified in application that use offline mode support.
+    If it is not specified then instance of <a href="http://emberjs.com/api/data/classes/DS.Store.html">DS.Store</a>
+    is set as value of this property during initialization of {{#crossLink "BaseStore"}}{{/crossLink}} class.
+
+    @property onlineStore
+    @type <a href="http://emberjs.com/api/data/classes/DS.Store.html">DS.Store</a>
+  */
   onlineStore: null,
+
+  /**
+    Store that use for making requests in offline mode.
+    By default it is set to global instane of {{#crossLink "LocalStore"}}{{/crossLink}} class.
+
+    @property offlineStore
+    @type <a href="http://emberjs.com/api/data/classes/DS.Store.html">DS.Store</a>
+  */
   offlineStore: null,
   offlineGlobals: Ember.inject.service('offline-globals'),
 
   /**
-   * Global instance of Syncer that contains methods to sync model.
-   *
-   * @property syncer
-   * @type Syncer
-   * @readOnly
-   */
+    Global instance of {{#crossLink "Syncer"}}{{/crossLink}} class that contains methods to sync model.
+
+    @property syncer
+    @type Syncer
+    @readOnly
+  */
   syncer: null,
 
+  /*
+    Store initialization.
+  */
   init() {
     this._super(...arguments);
     let owner = Ember.getOwner(this);
+
+    // Set online store if it is not specified in application explicitly.
     if (Ember.isNone(this.get('onlineStore'))) {
       let onlineStore = DS.Store.create(owner.ownerInjection());
       this.set('onlineStore', onlineStore);
     }
 
+    // Set Syncer.
     let syncer = owner.lookup('syncer:main');
     this.set('syncer', syncer);
 
+    // Set offline store.
     let offlineStore = owner.lookup('store:local');
     this.set('offlineStore', offlineStore);
   },
@@ -50,7 +76,7 @@ export default DS.Store.extend({
   */
   findAll(modelName, options) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = options ? options.useOnlineStore : null;
+    let useOnlineStore = options && options.useOnlineStore ? options.useOnlineStore : null;
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
     return useOnlineStoreCondition ? this._decorateMethodAndCall('all', 'findAll', arguments, 1) : offlineStore.findAll.apply(offlineStore, arguments);
   },
@@ -68,7 +94,7 @@ export default DS.Store.extend({
    */
   findRecord(modelName, id, options) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = options ? options.useOnlineStore : null;
+    let useOnlineStore = options && options.useOnlineStore ? options.useOnlineStore : null;
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
     return useOnlineStoreCondition ? this._decorateMethodAndCall('single', 'findRecord', arguments, 2) : offlineStore.findRecord.apply(offlineStore, arguments);
   },
@@ -89,7 +115,8 @@ export default DS.Store.extend({
   },
 
   /**
-    Query for records that meet certain criteria. Resolves with DS.RecordArray.
+    Query for records that meet certain criteria. Resolves with [DS.RecordArray](http://emberjs.com/api/data/classes/DS.RecordArray.html).
+	For more information see [query method](http://emberjs.com/api/data/classes/DS.Store.html#method_query) of [DS.Store](http://emberjs.com/api/data/classes/DS.Store.html).
     @method query
     @param {String} modelName
     @param {Object} query
@@ -98,7 +125,7 @@ export default DS.Store.extend({
   */
   query(modelName, query) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = query ? query.useOnlineStore : null;
+    let useOnlineStore = query && query.useOnlineStore ? query.useOnlineStore : null;
     if (query.useOnlineStore) {
       delete query.useOnlineStore;
     }
@@ -116,7 +143,7 @@ export default DS.Store.extend({
   */
   queryRecord(modelName, query) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = query ? query.useOnlineStore : null;
+    let useOnlineStore = query && query.useOnlineStore ? query.useOnlineStore : null;
     if (query.useOnlineStore) {
       delete query.useOnlineStore;
     }
