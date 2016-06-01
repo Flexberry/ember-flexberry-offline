@@ -76,7 +76,7 @@ export default DS.Store.extend({
   */
   findAll(modelName, options) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = options && options.useOnlineStore ? options.useOnlineStore : null;
+    let useOnlineStore = !Ember.isEmpty(options) && !Ember.isEmpty(options.useOnlineStore) ? options.useOnlineStore : null;
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
     return useOnlineStoreCondition ? this._decorateMethodAndCall('all', 'findAll', arguments, 1) : offlineStore.findAll.apply(offlineStore, arguments);
   },
@@ -94,7 +94,7 @@ export default DS.Store.extend({
    */
   findRecord(modelName, id, options) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = options && options.useOnlineStore ? options.useOnlineStore : null;
+    let useOnlineStore = !Ember.isEmpty(options) && !Ember.isEmpty(options.useOnlineStore) ? options.useOnlineStore : null;
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
     return useOnlineStoreCondition ? this._decorateMethodAndCall('single', 'findRecord', arguments, 2) : offlineStore.findRecord.apply(offlineStore, arguments);
   },
@@ -125,8 +125,8 @@ export default DS.Store.extend({
   */
   query(modelName, query) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = query && query.useOnlineStore ? query.useOnlineStore : null;
-    if (query.useOnlineStore) {
+    let useOnlineStore = !Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore) ? query.useOnlineStore : null;
+    if (!Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore)) {
       delete query.useOnlineStore;
     }
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
@@ -143,8 +143,8 @@ export default DS.Store.extend({
   */
   queryRecord(modelName, query) {
     let offlineStore = this.get('offlineStore');
-    let useOnlineStore = query && query.useOnlineStore ? query.useOnlineStore : null;
-    if (query.useOnlineStore) {
+    let useOnlineStore = !Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore) ? query.useOnlineStore : null;
+    if (!Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore)) {
       delete query.useOnlineStore;
     }
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
