@@ -1,7 +1,7 @@
 {
   "name": "ember-flexberry-offline",
-  "version": "1.0.0-alpha.1",
-  "description": "Addon that extends ember-data with ember-flexberry-projections to support work in offline mode.",
+  "version": "0.1.0",
+  "description": "Addon that extends ember-data to support work in offline mode.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -54,7 +54,7 @@
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.5",
-    "ember-flexberry-data": "git+https://github.com/Flexberry/ember-flexberry-data.git#56712e9f67384d312e492ba07ca32a83956a9318"
+    "ember-flexberry-data": "git+https://github.com/Flexberry/ember-flexberry-data.git#ca9ac2832e802690b9a9ab63490af1146af5bac1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
