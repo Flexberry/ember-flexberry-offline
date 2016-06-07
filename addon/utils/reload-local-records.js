@@ -26,7 +26,7 @@ export function reloadLocalRecords(type, reload, projectionName) {
 
   function deleteAll(localRecords) {
     var deletedRecords = localRecords.map(function(record) {
-      return localAdapter.deleteRecord(localStore, modelType, {id: record.id});
+      return localAdapter.deleteRecord(localStore, modelType, { id: record.id });
     });
 
     return RSVP.all(deletedRecords);
@@ -43,22 +43,20 @@ export function reloadLocalRecords(type, reload, projectionName) {
       return store.findAll(type, options).then(function(records) {
         return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
       });
-    }
-    else {
+    } else {
       var records = store.peekAll(type);
-	    return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
+      return createLocalRecords(store, localAdapter, localStore, modelType, records, projection);
     }
   }
 }
 
 function createLocalRecord(store, localAdapter, localStore, modelType, record, projection) {
-  if(record.get('id')) {
+  if (record.get('id')) {
     var snapshot = record._createSnapshot();
     return localAdapter.createRecord(localStore, modelType, snapshot).then(function() {
       return syncDownRelatedRecords(store, record, localAdapter, localStore, projection);
     });
-  }
-  else {
+  } else {
     var recordName = record.constructor && record.constructor.modelName;
     var warnMessage = 'Record ' + recordName + ' does not have an id, therefor we can not create it locally: ';
 
@@ -101,6 +99,7 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
       let modelType = store.modelFor(relatedRecord.constructor.modelName);
       promises.pushObject(createLocalRecord(store, localAdapter, localStore, modelType, relatedRecord, projection));
     }
+
     return promises;
   }
 
@@ -109,21 +108,21 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
     var modelType = store.modelFor(mainRecord.constructor.modelName);
     var attrs = projection.attributes;
     var relationshipNames = Ember.get(modelType, 'relationshipNames');
+    var createRelatedBelongsToRecordFunction = (relatedRecord) => {
+      if (!Ember.isNone(relatedRecord)) {
+        promises.pushObject(createRelatedBelongsToRecord(store, relatedRecord, localAdapter, localStore, attrs[belongToName]));
+      }
+    };
 
     for (let i = 0; i < relationshipNames.belongsTo.length; i++) {
       var belongToName = relationshipNames.belongsTo[i];
 
       // Save related record into local store only if relationship included into projection.
       if (attrs.hasOwnProperty(belongToName)) {
-        var async = isAsync(modelType, belongToName);
+        let async = isAsync(modelType, belongToName);
         if (async) {
-          mainRecord.get(belongToName).then(function(relatedRecord) {
-            if (!Ember.isNone(relatedRecord)) {
-              promises.pushObject(createRelatedBelongsToRecord(store, relatedRecord, localAdapter, localStore, attrs[belongToName]));
-            }
-          });
-        }
-        else {
+          mainRecord.get(belongToName).then(createRelatedBelongsToRecordFunction);
+        } else {
           if (isEmbedded(store, modelType, belongToName)) {
             var relatedRecord = mainRecord.get(belongToName);
             if (!Ember.isNone(relatedRecord)) {
@@ -134,18 +133,18 @@ export function syncDownRelatedRecords(store, mainRecord, localAdapter, localSto
       }
     }
 
+    var createRelatedHasManyRecordsFunction = (relatedRecords) =>
+      promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
+
     for (let i = 0; i < relationshipNames.hasMany.length; i++) {
       var hasManyName = relationshipNames.hasMany[i];
 
       // Save related records into local store only if relationship included into projection.
       if (attrs.hasOwnProperty(hasManyName)) {
-        var async = isAsync(modelType, hasManyName);
+        let async = isAsync(modelType, hasManyName);
         if (async) {
-          mainRecord.get(hasManyName).then(function(relatedRecords) {
-            return promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));
-          });
-        }
-        else {
+          mainRecord.get(hasManyName).then(createRelatedHasManyRecordsFunction);
+        } else {
           if (isEmbedded(store, modelType, hasManyName)) {
             var relatedRecords = mainRecord.get(hasManyName);
             promises.pushObjects(createRelatedHasManyRecords(store, relatedRecords, localAdapter, localStore, attrs[hasManyName]));

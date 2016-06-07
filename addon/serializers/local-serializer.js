@@ -1,8 +1,22 @@
-import DS from 'ember-data';
+/**
+  @module ember-flexberry-offline
+*/
+
+import Ember from 'ember';
 import LFSerializer from 'ember-localforage-adapter/serializers/localforage';
 import isObject from '../utils/is-object';
 
+/**
+  Base serializer for {{#crossLink "LocalStore"}}{{/crossLink}}.
+
+  @class LocalSerializer
+  @namespace Offline
+  @extends <a href="https://github.com/Flexberry/ember-localforage-adapter/blob/master/addon/serializers/localforage.js">LocalforageSerializer</a>
+*/
 export default LFSerializer.extend({
+  /*
+    Serializer initialization.
+  */
   init: function() {
     this._super(...arguments);
     let owner = Ember.getOwner(this);
@@ -10,11 +24,14 @@ export default LFSerializer.extend({
     this.set('store', localStore);
   },
 
-  extractRelationship (relationshipModelName, relationshipHash) {
+  /*
+    Returns a relationship formatted as a JSON-API "relationship object".
+    See http://jsonapi.org/format/#document-resource-object-relationships
+  */
+  extractRelationship(relationshipModelName, relationshipHash) {
     if (isObject(relationshipHash) && Ember.isNone(relationshipHash.type)) {
       relationshipHash.type = relationshipModelName;
-    }
-    else if (!isObject(relationshipHash) && !Ember.isNone(relationshipHash)) {
+    } else if (!isObject(relationshipHash) && !Ember.isNone(relationshipHash)) {
       var hash = {
         id: relationshipHash,
         type: relationshipModelName

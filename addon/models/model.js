@@ -1,17 +1,18 @@
-import Proj from 'ember-flexberry-data';
+/**
+  @module ember-flexberry-offline
+*/
+
+import FlexberryDS from 'ember-flexberry-data';
 import OfflineModel from '../mixins/offline-model';
 
 /**
- * @module ember-flexberry-offline
- */
+  Model with projections and additional metadata for offline support.
 
-/**
- * Model with projections and additional metadata for sync with online storage.
- *
- * @class Model
- * @namespace Offline
- * @extends Projection.Model
- * @public
- */
-export default Proj.Model.extend(OfflineModel, {
+  @class Model
+  @namespace Offline
+  @extends <a href="http://flexberry.github.io/Documentation/develop/classes/Projection.Model.html">DS.Projection.Model</a>
+  @uses DS.Offline.OfflineModel
+  @public
+*/
+export default FlexberryDS.Model.extend(OfflineModel, {
 });

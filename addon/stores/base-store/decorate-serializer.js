@@ -6,7 +6,7 @@ import isObject from '../../utils/is-object';
  * used.
  */
 export default function decorateSerializer(serializer) {
-  if(serializer.get('flexberry')) {
+  if (serializer.get('flexberry')) {
     return serializer;
   }
 
@@ -19,6 +19,7 @@ export default function decorateSerializer(serializer) {
   // normalize() is not used in localforage adapter, so we do not decorate
   decorateSerializerMethod(serializer, localSerializer, 'serialize', 0);
   decorateSerializerMethod(serializer, localSerializer, 'normalizeResponse',   2);
+
   // decorateSerializerMethod(serializer, localSerializer, 'normalize', 2);
 
   return serializer;
@@ -28,6 +29,7 @@ function decorateSerializerMethod(serializer, localSerializer, methodName, wrapp
   var originMethod = serializer[methodName];
   var backupMethod = function() {
     // remove flexberry from arg
+    //TODO: replace to ...args
     var args = Array.prototype.slice.call(arguments);
     delete args[wrappedArgIndex].flexberry;
 
@@ -37,7 +39,7 @@ function decorateSerializerMethod(serializer, localSerializer, methodName, wrapp
   serializer[methodName] = function() {
     var payload = arguments[wrappedArgIndex];
 
-    if(isObject(payload) && payload.flexberry) {
+    if (isObject(payload) && payload.flexberry) {
       return backupMethod.apply(localSerializer, arguments);
     } else {
       return originMethod.apply(serializer, arguments);

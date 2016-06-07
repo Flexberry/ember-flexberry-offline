@@ -4,10 +4,10 @@ import isObject from '../../utils/is-object';
 import generateUniqueId from '../../utils/generate-unique-id';
 
 /*
- * Extend adapter so that we can use local adapter when offline
- */
+  Extend online adapter so that we can switch to offline adapter if errors occurred.
+*/
 export default function decorateAdapter(adapter) {
-  if(adapter.get('flexberry')) {
+  if (adapter.get('flexberry')) {
     return adapter;
   }
 
@@ -49,19 +49,19 @@ function decorateAdapterMethod(adapter, localAdapter, methodName) {
 }
 
 function createBackupMethod(localAdapter, methodName) {
-  var container = localAdapter.container;
   var crudMethods = ['createRecord', 'updateRecord', 'deleteRecord'];
   var isCRUD = crudMethods.indexOf(methodName) !== -1;
   var isCreate = methodName === 'createRecord';
 
   return function backupMethod() {
+    //TODO: replace with ...args
     var args = Array.prototype.slice.call(arguments);
 
     // ---------- CRUD specific
-    if(isCRUD) {
+    if (isCRUD) {
       var snapshot = args[2];
 
-      if(isCreate) {
+      if (isCreate) {
         snapshot = addIdToSnapshot(snapshot);
       }
 
@@ -72,14 +72,16 @@ function createBackupMethod(localAdapter, methodName) {
       snapshot.flexberry = true;
       args[2] = snapshot;
     }
+
     // ---------- CRUD specific END
 
     return localAdapter[methodName].apply(localAdapter, args)
       .then(function(payload) {
         // decorate payload for serializer#extract
-        if(isObject(payload)) {
+        if (isObject(payload)) {
           payload.flexberry = true;
         }
+
         return payload;
       });
   };
@@ -88,11 +90,12 @@ function createBackupMethod(localAdapter, methodName) {
 // Add an id to record before create in local
 function addIdToSnapshot(snapshot) {
   var record = snapshot.record;
-  record.get('store').updateId(record, {id: generateUniqueId()});
+  record.get('store').updateId(record, { id: generateUniqueId() });
   return record._createSnapshot();
 }
-
+/*
 function createJobInSyncer(container, methodName, snapshot) {
   var syncer = Ember.getOwner(this).lookup('syncer:main');
   syncer.createJob(methodName, snapshot);
 }
+*/

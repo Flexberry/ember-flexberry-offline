@@ -1,4 +1,5 @@
 export function initialize(application) {
+  //Inject OfflieGlobalsService onto factories of specified types.
   [
     'store:local',
     'syncer:main',

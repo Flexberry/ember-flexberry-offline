@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import generateUniqueId from './utils/generate-unique-id';
 import {reloadLocalRecords, syncDownRelatedRecords} from './utils/reload-local-records';
 import isModelInstance from './utils/is-model-instance';
 
@@ -36,6 +35,7 @@ var RSVP = Ember.RSVP;
  */
 export default Ember.Object.extend({
   db: null,
+
   // initialize jobs since jobs may be used before we fetch from localforage
   jobs: [],
   remoteIdRecords: [],
@@ -49,20 +49,20 @@ export default Ember.Object.extend({
    * @private
    */
   init: function() {
-    let syncer = this;
+    let _this = this;
 
     let localStore = Ember.getOwner(this).lookup('store:local');
     let localAdapter = localStore.get('adapter');
 
-    syncer.set('db', window.localforage);
-    syncer.set('localStore', localStore);
-    syncer.set('localAdapter', localAdapter);
+    _this.set('db', window.localforage);
+    _this.set('localStore', localStore);
+    _this.set('localAdapter', localAdapter);
 
     // NOTE: get remoteIdRecords first then get jobs,
     // since jobs depend on remoteIdRecords
     /*
-    syncer.getAll('remoteIdRecord').then(
-      syncer.getAll.bind(syncer, 'job')
+    _this.getAll('remoteIdRecord').then(
+      _this.getAll.bind(_this, 'job')
     );
     */
   },
@@ -79,17 +79,17 @@ export default Ember.Object.extend({
    * @return {Promie}
    */
   syncDown: function(descriptor, reload, projectionName) {
-    let syncer = this;
+    let _this = this;
 
-    if(typeof descriptor === 'string') {
+    if (typeof descriptor === 'string') {
       return reloadLocalRecords.call(this, descriptor, reload, projectionName);
 
-    } else if(isModelInstance(descriptor)) {
-      return syncer._syncDownRecord(descriptor, reload, projectionName);
+    } else if (isModelInstance(descriptor)) {
+      return _this._syncDownRecord(descriptor, reload, projectionName);
 
-    } else if(Ember.isArray(descriptor)) {
+    } else if (Ember.isArray(descriptor)) {
       let updatedRecords = descriptor.map(function(record) {
-        return syncer._syncDownRecord(record, reload, projectionName);
+        return _this._syncDownRecord(record, reload, projectionName);
       });
       return RSVP.all(updatedRecords);
 
@@ -131,7 +131,7 @@ export default Ember.Object.extend({
       let localAdapter = this.get('localAdapter');
       let snapshot = record._createSnapshot();
 
-      if(record.get('isDeleted')) {
+      if (record.get('isDeleted')) {
         return localAdapter.deleteRecord(localStore, snapshot.type, snapshot);
       } else {
         return localAdapter.createRecord(localStore, snapshot.type, snapshot).then(function() {
@@ -140,7 +140,7 @@ export default Ember.Object.extend({
       }
     }
 
-    var syncer = this;
+    var _this = this;
     var store = Ember.getOwner(this).lookup('service:store');
     if (reload) {
       let modelName = record.constructor.modelName;
@@ -150,12 +150,11 @@ export default Ember.Object.extend({
       };
       options = Ember.isNone(projectionName) ? options : Ember.$.extend(true, options, { projection: projectionName });
       return store.findRecord(modelName, record.id, options).then(function(reloadedRecord) {
-        return saveRecordToLocalStore.call(syncer, store, reloadedRecord, projectionName);
-	  });
+        return saveRecordToLocalStore.call(_this, store, reloadedRecord, projectionName);
+      });
+    } else {
+      return saveRecordToLocalStore.call(_this, store, record, projectionName);
     }
-	else {
-      return saveRecordToLocalStore.call(syncer, store, record, projectionName);
-	}
   },
 
   deleteAll: function(typeName) {
@@ -176,8 +175,8 @@ function pluralize(typeName) {
 
 function getNamespace(typeName) {
   var LocalForageKeyHash = {
-    'job':            'EmberFryctoriaJobs',
-    'remoteIdRecord': 'EmberFryctoriaRemoteIdRecords',
+    job: 'EmberFryctoriaJobs',
+    remoteIdRecord: 'EmberFryctoriaRemoteIdRecords',
   };
   return LocalForageKeyHash[typeName];
 }

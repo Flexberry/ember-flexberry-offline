@@ -129,6 +129,7 @@ export default DS.Store.extend({
     if (!Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore)) {
       delete query.useOnlineStore;
     }
+
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
     return useOnlineStoreCondition ? this._decorateMethodAndCall('multiple', 'query', arguments, -1) : offlineStore.query.apply(offlineStore, arguments);
   },
@@ -147,8 +148,11 @@ export default DS.Store.extend({
     if (!Ember.isEmpty(query) && !Ember.isEmpty(query.useOnlineStore)) {
       delete query.useOnlineStore;
     }
+
     let useOnlineStoreCondition = (useOnlineStore === true) || (useOnlineStore === null && this._isOnline());
-    return useOnlineStoreCondition ? this._decorateMethodAndCall('single', 'queryRecord', arguments, -1) : offlineStore.queryRecord.apply(offlineStore, arguments);
+    return useOnlineStoreCondition ?
+           this._decorateMethodAndCall('single', 'queryRecord', arguments, -1) :
+           offlineStore.queryRecord.apply(offlineStore, arguments);
   },
 
   /**
@@ -300,8 +304,7 @@ export default DS.Store.extend({
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       let useOnlineStoreCondition = useOnlineStore || (Ember.isNone(useOnlineStore) && this._isOnline());
       return useOnlineStoreCondition ? decorateAdapter.call(this, adapter) : offlineStore.adapterFor(modelName);
-    }
-    else {
+    } else {
       return adapter;
     }
   },
@@ -320,8 +323,7 @@ export default DS.Store.extend({
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       let useOnlineStoreCondition = useOnlineStore || (Ember.isNone(useOnlineStore) && this._isOnline());
       return useOnlineStoreCondition ? decorateSerializer.call(this, serializer) : offlineStore.serializerFor(modelName);
-    }
-    else {
+    } else {
       return serializer;
     }
   },
@@ -333,9 +335,9 @@ export default DS.Store.extend({
     let onlineStore = this.get('onlineStore');
     let originMethod = onlineStore[originMethodName];
     let decoratedMethod = decorateAPICall(finderType, originMethod);
-	  if (optionsIndex > -1) {
+    if (optionsIndex > -1) {
       let options = originMethodArguments[optionsIndex];
-	    options = this.get('offlineGlobals').get('isOfflineEnabled') ? options : Ember.$.extend(true, { bypass: true }, options);
+      options = this.get('offlineGlobals').get('isOfflineEnabled') ? options : Ember.$.extend(true, { bypass: true }, options);
       originMethodArguments[optionsIndex] = options;
     }
 
