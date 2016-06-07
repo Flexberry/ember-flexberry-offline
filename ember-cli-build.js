@@ -4,7 +4,11 @@ var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
 module.exports = function(defaults) {
   var app = new EmberAddon(defaults, {
-    // Add options here
+    jscsOptions: {
+      enabled: true,
+      esnext: true,
+      configPath: './.jscsrc'
+    }
   });
 
   /*
