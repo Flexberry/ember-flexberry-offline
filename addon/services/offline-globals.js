@@ -86,10 +86,12 @@ export default Ember.Service.extend(Ember.Evented, {
     this._super(...arguments);
     let app = Ember.getOwner(this).application;
 
-    //Reading offline settings from application seetings in `environment.js`.
-    this._setOption('isOfflineEnabled', app.offline && app.offline.offlineEnabled);
-    this._setOption('isModeSwitchOnErrorsEnabled', app.offline && app.offline.modeSwitchOnErrorsEnabled);
-    this._setOption('isSyncDownWhenOnlineEnabled', app.offline && app.offline.syncDownWhenOnlineEnabled);
+    if (app.offline) {
+      //Reading offline settings from application seetings in `environment.js`.
+      this._setOption('isOfflineEnabled', app.offline.offlineEnabled);
+      this._setOption('isModeSwitchOnErrorsEnabled', app.offline.modeSwitchOnErrorsEnabled);
+      this._setOption('isSyncDownWhenOnlineEnabled', app.offline.syncDownWhenOnlineEnabled);
+    }
 
     //Detect availability of online connection at start of application.
     let isOnlineAvailable = this.checkOnlineAvailable();
