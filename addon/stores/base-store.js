@@ -303,7 +303,7 @@ export default DS.Store.extend({
     let adapter = onlineStore.adapterFor(modelName);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       let useOnlineStoreCondition = useOnlineStore || (Ember.isNone(useOnlineStore) && this._isOnline());
-      return useOnlineStoreCondition ? decorateAdapter.call(this, adapter) : offlineStore.adapterFor(modelName);
+      return useOnlineStoreCondition ? decorateAdapter.call(this, adapter, modelName) : offlineStore.adapterFor(modelName);
     } else {
       return adapter;
     }
@@ -322,7 +322,7 @@ export default DS.Store.extend({
     let serializer = onlineStore.serializerFor(modelName);
     if (this.get('offlineGlobals').get('isOfflineEnabled')) {
       let useOnlineStoreCondition = useOnlineStore || (Ember.isNone(useOnlineStore) && this._isOnline());
-      return useOnlineStoreCondition ? decorateSerializer.call(this, serializer) : offlineStore.serializerFor(modelName);
+      return useOnlineStoreCondition ? decorateSerializer.call(this, serializer, modelName) : offlineStore.serializerFor(modelName);
     } else {
       return serializer;
     }

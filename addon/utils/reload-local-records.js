@@ -14,9 +14,10 @@ var RSVP = Ember.RSVP;
 export function reloadLocalRecords(type, reload, projectionName) {
   var store = Ember.getOwner(this).lookup('service:store');
   var modelType = store.modelFor(type);
+  let modelName = modelType.modelName;
 
   var localStore = Ember.getOwner(this).lookup('store:local');
-  var localAdapter = localStore.get('adapter');
+  var localAdapter = localStore.adapterFor(modelName);
 
   var reloadedRecords = localAdapter.findAll(localStore, modelType)
     .then(deleteAll)

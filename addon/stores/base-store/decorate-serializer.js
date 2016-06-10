@@ -5,14 +5,14 @@ import isObject from '../../utils/is-object';
  * Extend serializer so that we can use local serializer when local adater is
  * used.
  */
-export default function decorateSerializer(serializer) {
+export default function decorateSerializer(serializer, modelName) {
   if (serializer.get('flexberry')) {
     return serializer;
   }
 
   serializer.set('flexberry', true);
 
-  var localSerializer = Ember.getOwner(this).lookup('store:local').get('adapter.serializer');
+  var localSerializer = Ember.getOwner(this).lookup('store:local').serializerFor(modelName);
 
   // serialize()
   // normalizeResponse()

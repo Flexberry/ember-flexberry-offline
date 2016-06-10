@@ -41,6 +41,15 @@ export default Ember.Object.extend({
   remoteIdRecords: [],
 
   /**
+    Store that use for making requests in offline mode.
+    By default it is set to global instane of {{#crossLink "LocalStore"}}{{/crossLink}} class.
+
+    @property offlineStore
+    @type <a href="http://emberjs.com/api/data/classes/DS.Store.html">DS.Store</a>
+  */
+  offlineStore: undefined,
+
+  /**
    * Initialize db.
    *
    * Initialize jobs, remoteIdRecords.
@@ -52,11 +61,9 @@ export default Ember.Object.extend({
     let _this = this;
 
     let localStore = Ember.getOwner(this).lookup('store:local');
-    let localAdapter = localStore.get('adapter');
 
     _this.set('db', window.localforage);
-    _this.set('localStore', localStore);
-    _this.set('localAdapter', localAdapter);
+    _this.set('offlineStore', localStore);
 
     // NOTE: get remoteIdRecords first then get jobs,
     // since jobs depend on remoteIdRecords
@@ -110,7 +117,7 @@ export default Ember.Object.extend({
     return RSVP.all([
       this.deleteAll('job'),
       this.deleteAll('remoteIdRecord'),
-      this.get('localAdapter').clear()
+      this.this.get('offlineStore.adapter').clear()
     ]);
   },
 
@@ -125,10 +132,11 @@ export default Ember.Object.extend({
    */
   _syncDownRecord: function(record, reload, projectionName) {
     function saveRecordToLocalStore(store, record, projectionName) {
-      let modelType = store.modelFor(record.constructor.modelName);
+      let modelName = record.constructor.modelName;
+      let modelType = store.modelFor(modelName);
       let projection = modelType.projections[projectionName];
-      let localStore = this.get('localStore');
-      let localAdapter = this.get('localAdapter');
+      let localStore = this.get('offlineStore');
+      let localAdapter = localStore.adapterFor(modelName);
       let snapshot = record._createSnapshot();
 
       if (record.get('isDeleted')) {

@@ -27,25 +27,45 @@ export default DS.Store.extend({
   },
 
   /**
-   * Serializer is fetched via this method or adapter.serializer
+   * Returns an instance of the serializer for a given type.
+   * Offline serializers should have name with postfix '-offline'.
    *
    * @method serializerFor
+   * @param {String} modelName The name of the model type.
    * @public
    */
   serializerFor: function(modelName) {
     let owner = Ember.getOwner(this);
     let serializer = owner.lookup(`serializer:${modelName}-offline`);
+    if (!serializer) {
+      serializer = owner.lookup(`serializer:application-offline`);
+      if (!serializer) {
+        serializer = this.adapterFor(modelName).defaultSerializer;
+      }
+    }
+
     return serializer;
   },
 
   /**
-   * Adapter is fetched via this method or adapter property
+   * Returns an instance of the adapter for a given type.
+   * Offline adapters should have name with postfix '-offline'.
    *
    * @method adapterFor
+   * @param {String} modelName The name of the model type.
    * @public
    */
-  adapterFor: function() {
-    return this.get('adapter');
+  adapterFor: function(modelName) {
+    let owner = Ember.getOwner(this);
+    let adapter = owner.lookup(`adapter:${modelName}-offline`);
+    if (!adapter) {
+      adapter = owner.lookup(`adapter:application-offline`);
+      if (!adapter) {
+        adapter = this.get('adapter');
+      }
+    }
+
+    return adapter;
   },
 
   /**

@@ -9,8 +9,8 @@ import generateUniqueId from '../utils/generate-unique-id';
   Default adapter for {{#crossLink "LocalStore"}}{{/crossLink}}.
 
   @class LocalAdapter
+  @namespace Offline
   @extends <a href="https://github.com/Flexberry/ember-localforage-adapter/blob/master/addon/adapters/localforage.js">LocalforageAdapter</a>
-  @private
 */
 var LocalAdapter = LFAdapter.extend({
   /*

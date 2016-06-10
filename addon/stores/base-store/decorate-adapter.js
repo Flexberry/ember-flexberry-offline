@@ -6,14 +6,14 @@ import generateUniqueId from '../../utils/generate-unique-id';
 /*
   Extend online adapter so that we can switch to offline adapter if errors occurred.
 */
-export default function decorateAdapter(adapter) {
+export default function decorateAdapter(adapter, modelName) {
   if (adapter.get('flexberry')) {
     return adapter;
   }
 
   adapter.set('flexberry', {});
 
-  var localAdapter = Ember.getOwner(this).lookup('store:local').get('adapter');
+  var localAdapter = Ember.getOwner(this).lookup('store:local').adapterFor(modelName);
 
   // findRecord()
   // findAll()
