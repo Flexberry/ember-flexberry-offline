@@ -54,7 +54,7 @@
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.6",
-    "ember-flexberry-data": "git+https://github.com/Flexberry/ember-flexberry-data.git#25da84216eacc2b206cbc8fd5c53641bafad411b"
+    "ember-flexberry-data": "git+https://github.com/Flexberry/ember-flexberry-data.git#develop"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
